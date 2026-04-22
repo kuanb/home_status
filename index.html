@@ -1,27 +1,162 @@
-<HTML>
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#0b0b14" />
+  <title>670 Vernon — PurpleAir Live</title>
+  <link rel="preconnect" href="https://api.purpleair.com" />
+  <link rel="stylesheet" href="styles.css" />
+  <script defer src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+</head>
+<body>
+  <div class="bg-grid" aria-hidden="true"></div>
+  <div class="bg-glow" aria-hidden="true"></div>
 
-<HEAD>
+  <header class="topbar">
+    <div class="brand">
+      <span class="dot"></span>
+      <span class="brand-name">PurpleAir Live</span>
+      <span class="brand-sep">/</span>
+      <span class="brand-sensor" id="sensorLabel">sensor 38371</span>
+    </div>
+    <div class="topbar-actions">
+      <div class="refresh-ring" title="Next refresh">
+        <svg viewBox="0 0 36 36" aria-hidden="true">
+          <circle class="ring-bg" cx="18" cy="18" r="15.5" />
+          <circle class="ring-fg" id="refreshRing" cx="18" cy="18" r="15.5" />
+        </svg>
+        <span class="ring-label" id="refreshLabel">--s</span>
+      </div>
+      <button class="icon-btn" id="refreshBtn" title="Refresh now" aria-label="Refresh now">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12a9 9 0 1 1-3.2-6.9M21 4v5h-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+      <button class="icon-btn" id="settingsBtn" title="Settings" aria-label="Settings">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1A2 2 0 1 1 4.3 17l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1Z" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+    </div>
+  </header>
 
-<TITLE>670 Vernon PurpleAir status</TITLE>
+  <main id="app">
+    <section class="hero" id="hero">
+      <div class="hero-meta">
+        <h1 id="sensorName" class="sensor-name">Loading…</h1>
+        <div class="hero-chips" id="heroChips"></div>
+      </div>
+      <div class="hero-aqi" id="heroAqi">
+        <div class="aqi-label">US EPA AQI (PM2.5)</div>
+        <div class="aqi-number" id="aqiNumber">—</div>
+        <div class="aqi-category" id="aqiCategory">—</div>
+        <div class="aqi-subline" id="aqiSubline">—</div>
+        <div class="aqi-scale" id="aqiScale" aria-hidden="true"></div>
+      </div>
+    </section>
 
-</HEAD>
+    <section class="panels" id="panels">
+      <article class="card span-2" id="card-averages">
+        <header class="card-h"><h2>PM2.5 averages</h2><span class="card-sub">current · 10m · 30m · 60m · 6h · 24h · 1w</span></header>
+        <div class="chart-wrap"><canvas id="chartAverages"></canvas></div>
+      </article>
 
-<BODY>
+      <article class="card span-2" id="card-particles">
+        <header class="card-h"><h2>Particle size distribution</h2><span class="card-sub">counts per deciliter · channels A and B</span></header>
+        <div class="chart-wrap"><canvas id="chartParticles"></canvas></div>
+      </article>
 
-<h1>670 Vernon PurpleAir status</h1>
+      <article class="card" id="card-mass">
+        <header class="card-h"><h2>Mass concentration</h2><span class="card-sub">µg/m³ · ATM</span></header>
+        <div class="mass-rows" id="massRows"></div>
+      </article>
 
-<div id='PurpleAirWidget_38371_module_TEMP_conversion_C0_average_10_layer_standard'>Loading PurpleAir Tempterature Widget...</div>
-<script src='https://www.purpleair.com/pa.widget.js?key=NOHT3I4B21VVXXXY&module=TEMP&conversion=C0&average=10&layer=standard&container=PurpleAirWidget_38371_module_TEMP_conversion_C0_average_10_layer_standard'></script>
+      <article class="card" id="card-env">
+        <header class="card-h"><h2>Environment</h2><span class="card-sub">inside sensor housing</span></header>
+        <div class="env-grid" id="envGrid"></div>
+        <p class="footnote">PurpleAir reports temperature and humidity inside the housing. Ambient estimates apply the vendor correction (−8°F, +4% RH).</p>
+      </article>
 
-<div id='PurpleAirWidget_38371_module_AQI_conversion_C0_average_10_layer_standard'>Loading PurpleAir Air Quality Widget...</div>
-<script src='https://www.purpleair.com/pa.widget.js?key=NOHT3I4B21VVXXXY&module=AQI&conversion=C0&average=10&layer=standard&container=PurpleAirWidget_38371_module_AQI_conversion_C0_average_10_layer_standard'></script>
+      <article class="card" id="card-visibility">
+        <header class="card-h"><h2>Visibility &amp; scattering</h2><span class="card-sub">derived optical fields</span></header>
+        <div class="kv-grid" id="visGrid"></div>
+      </article>
 
-<div id='PurpleAirWidget_38371_module_HUMIDITY_conversion_C0_average_10_layer_standard'>Loading PurpleAir Humidity Widget...</div>
-<script src='https://www.purpleair.com/pa.widget.js?key=NOHT3I4B21VVXXXY&module=HUMIDITY&conversion=C0&average=10&layer=standard&container=PurpleAirWidget_38371_module_HUMIDITY_conversion_C0_average_10_layer_standard'></script>
+      <article class="card" id="card-misc">
+        <header class="card-h"><h2>Misc sensors</h2><span class="card-sub">VOC · ozone · analog</span></header>
+        <div class="kv-grid" id="miscGrid"></div>
+      </article>
 
-<div id='PurpleAirWidget_38371_module_HUMIDEX_F_conversion_C0_average_10_layer_standard'>Loading PurpleAir Humidex Widget...</div>
-<script src='https://www.purpleair.com/pa.widget.js?key=NOHT3I4B21VVXXXY&module=HUMIDEX_F&conversion=C0&average=10&layer=standard&container=PurpleAirWidget_38371_module_HUMIDEX_F_conversion_C0_average_10_layer_standard'></script>
+      <article class="card span-2" id="card-diag">
+        <header class="card-h"><h2>Dual-channel diagnostics</h2><span class="card-sub">A vs B · confidence &amp; flags</span></header>
+        <div class="diag-grid" id="diagGrid"></div>
+      </article>
 
-</BODY>
+      <article class="card" id="card-device">
+        <header class="card-h"><h2>Device health</h2><span class="card-sub">connectivity &amp; firmware</span></header>
+        <div class="kv-grid" id="deviceGrid"></div>
+      </article>
 
-</HTML>
+      <article class="card" id="card-location">
+        <header class="card-h"><h2>Location</h2><span class="card-sub">lat · lon · altitude</span></header>
+        <div class="kv-grid" id="locGrid"></div>
+        <div class="map-wrap" id="mapWrap"></div>
+      </article>
+
+      <article class="card span-full" id="card-raw">
+        <header class="card-h"><h2>Raw response</h2><span class="card-sub">every field returned by the API</span></header>
+        <details>
+          <summary>Show full JSON</summary>
+          <pre id="rawJson" class="raw-json">—</pre>
+        </details>
+      </article>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <span id="footerStatus">Waiting for data…</span>
+    <a class="footer-link" href="https://api.purpleair.com/" target="_blank" rel="noreferrer noopener">PurpleAir API</a>
+  </footer>
+
+  <!-- Toast -->
+  <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+
+  <!-- Settings dialog -->
+  <dialog class="settings" id="settingsDialog">
+    <form method="dialog" id="settingsForm">
+      <h2>Settings</h2>
+      <p class="settings-intro">Stored locally in your browser. Never sent anywhere except directly to PurpleAir.</p>
+
+      <label>
+        <span>PurpleAir Read Key</span>
+        <input type="password" id="inputApiKey" autocomplete="off" spellcheck="false" placeholder="paste X-API-Key (read)" />
+        <small>Get one free at <a href="https://develop.purpleair.com/" target="_blank" rel="noreferrer">develop.purpleair.com</a>.</small>
+      </label>
+
+      <label>
+        <span>Sensor index</span>
+        <input type="number" id="inputSensorIndex" min="0" step="1" placeholder="38371" />
+      </label>
+
+      <label>
+        <span>Private sensor read_key <em>(optional)</em></span>
+        <input type="text" id="inputPrivateKey" autocomplete="off" spellcheck="false" placeholder="per-sensor read_key, if private" />
+      </label>
+
+      <label>
+        <span>Refresh cadence</span>
+        <select id="inputCadence">
+          <option value="60">60 seconds</option>
+          <option value="120" selected>2 minutes</option>
+          <option value="300">5 minutes</option>
+          <option value="0">Manual only</option>
+        </select>
+      </label>
+
+      <div class="dialog-actions">
+        <button type="button" class="btn ghost" id="settingsCancel">Cancel</button>
+        <button type="submit" class="btn primary" id="settingsSave">Save &amp; refresh</button>
+      </div>
+    </form>
+  </dialog>
+
+  <script type="module" src="./app.js"></script>
+</body>
+</html>
