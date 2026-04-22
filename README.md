@@ -45,9 +45,20 @@ top of [app.js](app.js).
 
 ## Deploying to GitHub Pages
 
-1. Push the repo to GitHub.
-2. Repo → Settings → Pages → Source: `main` branch, `/` root.
-3. Wait ~30 s, then open `https://<you>.github.io/home_status/`.
+A workflow at [.github/workflows/deploy.yml](.github/workflows/deploy.yml)
+publishes every push to `master` using the official
+`actions/upload-pages-artifact` + `actions/deploy-pages` pair (no
+`gh-pages` branch — Pages is built straight from the artifact).
+
+One-time setup:
+
+1. Repo → **Settings → Pages** → Source: **GitHub Actions**.
+2. Push to `master`. The workflow runs `build` then `deploy`.
+3. The deploy step prints the live URL (typically
+   `https://<you>.github.io/home_status/`).
+
+The workflow can also be triggered manually from the **Actions** tab via
+*Run workflow* (`workflow_dispatch`).
 
 All four files (`index.html`, `styles.css`, `app.js`, `fields.js`) are
 static and self-contained; Chart.js loads from jsDelivr.
