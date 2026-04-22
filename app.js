@@ -352,8 +352,8 @@ function renderEnv(sensor) {
   const tiles = [
     {
       label: "Temperature",
-      value: t == null ? "—" : `${fmt(t, 0)}°F`,
-      sub: t == null ? "" : `housing · ambient est. ${fmt(atF, 0)}°F / ${fmt(fToC(atF), 0)}°C`,
+      value: atF == null ? "—" : `${fmt(atF, 0)}°F`,
+      sub: t == null ? "" : `simple correction (−8°F) · raw ${fmt(t, 0)}°F · ${fmt(fToC(atF), 0)}°C`,
     },
     {
       label: "Humidity",
